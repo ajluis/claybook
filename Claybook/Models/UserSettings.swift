@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 import SwiftData
 
 enum MeasurementUnit: String, Codable, CaseIterable {
@@ -25,15 +25,50 @@ enum ViewMode: String, Codable, CaseIterable {
     case list
 }
 
+enum AppearanceMode: String, Codable, CaseIterable {
+    case system
+    case light
+    case dark
+
+    var displayName: String {
+        switch self {
+        case .system: "System"
+        case .light: "Light"
+        case .dark: "Dark"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
+    }
+}
+
 @Model
 final class UserSettings {
     var id: UUID
     var measurementUnit: MeasurementUnit
     var defaultViewMode: ViewMode
+    @Attribute(originalName: "appearanceMode")
+    private var appearanceModeRaw: String?
 
-    init(measurementUnit: MeasurementUnit = .inches, defaultViewMode: ViewMode = .grid) {
+    var appearanceMode: AppearanceMode {
+        get {
+            guard let appearanceModeRaw else { return .system }
+            return AppearanceMode(rawValue: appearanceModeRaw) ?? .system
+        }
+        set {
+            appearanceModeRaw = newValue.rawValue
+        }
+    }
+
+    init(measurementUnit: MeasurementUnit = .inches, defaultViewMode: ViewMode = .grid, appearanceMode: AppearanceMode = .system) {
         self.id = UUID()
         self.measurementUnit = measurementUnit
         self.defaultViewMode = defaultViewMode
+        self.appearanceModeRaw = appearanceMode.rawValue
     }
 }

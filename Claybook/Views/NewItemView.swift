@@ -21,7 +21,6 @@ struct NewItemView: View {
     @State private var topDiameterText = ""
     @State private var bottomDiameterText = ""
     @State private var selectedImages: [UIImage] = []
-    @State private var showDetails = false
 
     // Autocomplete
     @Query private var allItems: [Item]
@@ -35,105 +34,69 @@ struct NewItemView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: Constants.Layout.sectionSpacing) {
-                    // Photo section
-                    VStack(spacing: 8) {
-                        if selectedImages.isEmpty {
-                            Button {
-                                // PhotoPicker handles internally
-                            } label: {
-                                VStack(spacing: 12) {
-                                    Image(systemName: "camera.fill")
-                                        .font(.system(size: 40))
-                                        .foregroundStyle(Color.theme.accent)
-                                    Text("Add a Photo")
-                                        .font(.headline)
-                                        .foregroundStyle(Color.theme.textPrimary)
-                                    Text("Recommended")
-                                        .font(.caption)
-                                        .foregroundStyle(Color.theme.textSecondary)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 180)
-                                .background(Color.theme.surfaceSecondary)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                            }
-                        }
-                        PhotoPicker(selectedImages: $selectedImages)
-                    }
-
+                VStack(spacing: 20) {
                     // Title
-                    VStack(alignment: .leading, spacing: 8) {
-                        TextField("What are you making?", text: $title)
-                            .font(.title2)
-                            .textFieldStyle(.plain)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 14)
-                            .background(Color.theme.surfaceSecondary)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                    }
+                    TextField("What are you making?", text: $title)
+                        .font(.title3)
+                        .textFieldStyle(.plain)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 14)
+                        .background(Color.theme.surfaceSecondary)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                    // Expandable details
-                    DisclosureGroup(isExpanded: $showDetails) {
-                        VStack(spacing: 16) {
-                            // Type picker
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Type")
-                                    .sectionHeader()
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 8) {
-                                        ForEach(ItemType.allCases) { type in
-                                            Button {
-                                                selectedType = type
-                                            } label: {
-                                                VStack(spacing: 4) {
-                                                    Image(systemName: type.icon)
-                                                        .font(.title3)
-                                                    Text(type.displayName)
-                                                        .font(.caption)
-                                                }
-                                                .foregroundStyle(selectedType == type ? .white : Color.theme.textPrimary)
-                                                .padding(.horizontal, 14)
-                                                .padding(.vertical, 10)
-                                                .background(selectedType == type ? Color.theme.primary : Color.theme.surfaceSecondary)
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                            }
+                    // Photo section — compact buttons + thumbnails
+                    PhotoPicker(selectedImages: $selectedImages)
+
+                    // Type picker
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Type")
+                            .sectionHeader()
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(ItemType.allCases) { type in
+                                    Button {
+                                        selectedType = type
+                                    } label: {
+                                        VStack(spacing: 4) {
+                                            Image(systemName: type.icon)
+                                                .font(.title3)
+                                            Text(type.displayName)
+                                                .font(.caption)
                                         }
+                                        .foregroundStyle(selectedType == type ? .white : Color.theme.textPrimary)
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 10)
+                                        .background(selectedType == type ? Color.theme.primary : Color.theme.surfaceSecondary)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
                                     }
                                 }
                             }
-
-                            // Clay type
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Clay")
-                                    .sectionHeader()
-                                AutocompleteField(
-                                    title: "Clay type (e.g. Stoneware)",
-                                    text: $clayType,
-                                    suggestions: claySuggestions
-                                )
-                            }
-
-                            // Measurements
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Measurements")
-                                    .sectionHeader()
-                                MeasurementFields(
-                                    height: $heightText,
-                                    width: $widthText,
-                                    topDiameter: $topDiameterText,
-                                    bottomDiameter: $bottomDiameterText,
-                                    unit: unit
-                                )
-                            }
                         }
-                        .padding(.top, 12)
-                    } label: {
-                        Text("Add Details")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Color.theme.textSecondary)
                     }
-                    .tint(Color.theme.textSecondary)
+
+                    // Clay type
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Clay")
+                            .sectionHeader()
+                        AutocompleteField(
+                            title: "Clay type (e.g. Stoneware)",
+                            text: $clayType,
+                            suggestions: claySuggestions
+                        )
+                    }
+
+                    // Measurements
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Measurements")
+                            .sectionHeader()
+                        MeasurementFields(
+                            height: $heightText,
+                            width: $widthText,
+                            topDiameter: $topDiameterText,
+                            bottomDiameter: $bottomDiameterText,
+                            unit: unit
+                        )
+                    }
 
                     // Save button
                     LargeButton(title: "Save", icon: "checkmark") {
@@ -161,7 +124,6 @@ struct NewItemView: View {
                 clayType = prefillClay
                 heightText = prefillHeight
                 widthText = prefillWidth
-                showDetails = true
             }
         }
     }

@@ -7,6 +7,7 @@ struct SettingsView: View {
 
     @State private var measurementUnit: MeasurementUnit = .inches
     @State private var defaultViewMode: ViewMode = .grid
+    @State private var appearanceMode: AppearanceMode = .system
     @State private var didLoad = false
 
     private var settings: UserSettings {
@@ -15,6 +16,18 @@ struct SettingsView: View {
 
     var body: some View {
         List {
+            Section("Appearance") {
+                Picker("Theme", selection: $appearanceMode) {
+                    ForEach(AppearanceMode.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: appearanceMode) { _, newValue in
+                    settings.appearanceMode = newValue
+                }
+            }
+
             Section("Display") {
                 Picker("Measurement Units", selection: $measurementUnit) {
                     ForEach(MeasurementUnit.allCases, id: \.self) { unit in
@@ -59,6 +72,7 @@ struct SettingsView: View {
             guard !didLoad else { return }
             measurementUnit = settings.measurementUnit
             defaultViewMode = settings.defaultViewMode
+            appearanceMode = settings.appearanceMode
             didLoad = true
         }
     }

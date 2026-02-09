@@ -16,6 +16,7 @@ settings:
     INFOPLIST_KEY_UIRequiresFullScreen: true
     INFOPLIST_KEY_NSCameraUsageDescription: "Claybook uses the camera to photograph your pottery pieces at each stage."
     INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Claybook accesses your photo library to add photos of your pottery pieces."
+    INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
 
 targets:
   Claybook:
