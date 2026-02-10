@@ -13,7 +13,8 @@ struct ItemCard: View {
                     .aspectRatio(1, contentMode: .fit)
 
                 if let photo = item.displayPhoto {
-                    PhotoThumbnail(fileName: photo.fileName)
+                    PhotoThumbnail(fileName: photo.fileName, contentMode: .fit)
+                        .padding(8)
                 } else {
                     Image(systemName: item.type.icon)
                         .font(.largeTitle)

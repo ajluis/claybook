@@ -2,6 +2,8 @@ import SwiftUI
 import SwiftData
 
 struct LibraryView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.modelContext) private var modelContext
     @Query(filter: #Predicate<Item> { !$0.isArchived },
            sort: \Item.updatedAt, order: .reverse) private var items: [Item]
@@ -46,10 +48,20 @@ struct LibraryView: View {
         return result
     }
 
-    private let gridColumns = [
-        GridItem(.flexible(), spacing: Constants.Grid.spacing),
-        GridItem(.flexible(), spacing: Constants.Grid.spacing)
-    ]
+    private var gridColumns: [GridItem] {
+        let minWidth: CGFloat
+        if dynamicTypeSize.isAccessibilitySize {
+            minWidth = 300
+        } else if horizontalSizeClass == .compact {
+            minWidth = 170
+        } else {
+            minWidth = 220
+        }
+
+        return [
+            GridItem(.adaptive(minimum: minWidth, maximum: 320), spacing: Constants.Grid.spacing, alignment: .top)
+        ]
+    }
 
     var body: some View {
         NavigationStack {
