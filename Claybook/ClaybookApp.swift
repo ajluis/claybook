@@ -7,7 +7,7 @@ struct ClaybookApp: App {
     let modelContainer: ModelContainer
 
     init() {
-        let schema = Schema(versionedSchema: ClaybookSchemaV3.self)
+        let schema = Schema(versionedSchema: ClaybookSchemaV4.self)
         modelContainer = Self.makeResilientModelContainer(schema: schema)
     }
 
@@ -62,7 +62,8 @@ struct ContentView: View {
         LibraryView()
             .preferredColorScheme(colorScheme)
             .onAppear {
-                modelContext.fetchOrCreateSettings()
+                let settings = modelContext.fetchOrCreateSettings()
+                PotteryReminderService.syncWeekendReminder(enabled: settings.weekendReminderEnabled)
             }
     }
 }

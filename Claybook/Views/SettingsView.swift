@@ -8,6 +8,7 @@ struct SettingsView: View {
     @State private var measurementUnit: MeasurementUnit = .inches
     @State private var defaultViewMode: ViewMode = .grid
     @State private var appearanceMode: AppearanceMode = .system
+    @State private var weekendReminderEnabled = true
     @State private var didLoad = false
 
     private var settings: UserSettings {
@@ -49,6 +50,18 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Notifications") {
+                Toggle("Pottery reminder", isOn: $weekendReminderEnabled)
+                    .onChange(of: weekendReminderEnabled) { _, newValue in
+                        settings.weekendReminderEnabled = newValue
+                        PotteryReminderService.syncWeekendReminder(enabled: newValue)
+                    }
+
+                Text("Sends a reminder on Saturday at 6:00 PM: \"Excited for pottery tomorrow?\"")
+                    .font(.caption)
+                    .foregroundStyle(Color.theme.textSecondary)
+            }
+
             Section("Library") {
                 NavigationLink("Kiln Loads") {
                     KilnLoadListView()
@@ -73,6 +86,8 @@ struct SettingsView: View {
             measurementUnit = settings.measurementUnit
             defaultViewMode = settings.defaultViewMode
             appearanceMode = settings.appearanceMode
+            weekendReminderEnabled = settings.weekendReminderEnabled
+            PotteryReminderService.syncWeekendReminder(enabled: weekendReminderEnabled)
             didLoad = true
         }
     }

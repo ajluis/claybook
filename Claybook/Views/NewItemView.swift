@@ -21,6 +21,7 @@ struct NewItemView: View {
     @State private var topDiameterText = ""
     @State private var bottomDiameterText = ""
     @State private var selectedImages: [UIImage] = []
+    @State private var showOptionalDetails = false
 
     // Autocomplete
     @Query private var allItems: [Item]
@@ -47,56 +48,73 @@ struct NewItemView: View {
                     // Photo section — compact buttons + thumbnails
                     PhotoPicker(selectedImages: $selectedImages)
 
-                    // Type picker
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Type")
-                            .sectionHeader()
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach(ItemType.allCases) { type in
-                                    Button {
-                                        selectedType = type
-                                    } label: {
-                                        VStack(spacing: 4) {
-                                            Image(systemName: type.icon)
-                                                .font(.title3)
-                                            Text(type.displayName)
-                                                .font(.caption)
+                    DisclosureGroup(isExpanded: $showOptionalDetails) {
+                        VStack(spacing: 16) {
+                            // Type picker
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Type")
+                                    .sectionHeader()
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(ItemType.allCases) { type in
+                                            Button {
+                                                selectedType = type
+                                            } label: {
+                                                VStack(spacing: 4) {
+                                                    Image(systemName: type.icon)
+                                                        .font(.title3)
+                                                    Text(type.displayName)
+                                                        .font(.caption)
+                                                }
+                                                .foregroundStyle(selectedType == type ? .white : Color.theme.textPrimary)
+                                                .padding(.horizontal, 14)
+                                                .padding(.vertical, 10)
+                                                .background(selectedType == type ? Color.theme.primary : Color.theme.surfaceSecondary)
+                                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            }
                                         }
-                                        .foregroundStyle(selectedType == type ? .white : Color.theme.textPrimary)
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 10)
-                                        .background(selectedType == type ? Color.theme.primary : Color.theme.surfaceSecondary)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
                                     }
                                 }
                             }
+
+                            // Clay type
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Clay")
+                                    .sectionHeader()
+                                AutocompleteField(
+                                    title: "Clay type (e.g. Stoneware)",
+                                    text: $clayType,
+                                    suggestions: claySuggestions
+                                )
+                            }
+
+                            // Measurements
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Measurements")
+                                    .sectionHeader()
+                                MeasurementFields(
+                                    height: $heightText,
+                                    width: $widthText,
+                                    topDiameter: $topDiameterText,
+                                    bottomDiameter: $bottomDiameterText,
+                                    unit: unit
+                                )
+                            }
+                        }
+                        .padding(.top, 8)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Optional details")
+                                .font(.headline)
+                                .foregroundStyle(Color.theme.textPrimary)
+                            Text("Type, clay, and measurements")
+                                .font(.caption)
+                                .foregroundStyle(Color.theme.textSecondary)
                         }
                     }
-
-                    // Clay type
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Clay")
-                            .sectionHeader()
-                        AutocompleteField(
-                            title: "Clay type (e.g. Stoneware)",
-                            text: $clayType,
-                            suggestions: claySuggestions
-                        )
-                    }
-
-                    // Measurements
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Measurements")
-                            .sectionHeader()
-                        MeasurementFields(
-                            height: $heightText,
-                            width: $widthText,
-                            topDiameter: $topDiameterText,
-                            bottomDiameter: $bottomDiameterText,
-                            unit: unit
-                        )
-                    }
+                    .padding(12)
+                    .background(Color.theme.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
 
                     // Save button
                     LargeButton(title: "Save", icon: "checkmark") {
@@ -124,6 +142,9 @@ struct NewItemView: View {
                 clayType = prefillClay
                 heightText = prefillHeight
                 widthText = prefillWidth
+            }
+            if prefillType != .other || !prefillClay.isEmpty || !prefillHeight.isEmpty || !prefillWidth.isEmpty {
+                showOptionalDetails = true
             }
         }
     }

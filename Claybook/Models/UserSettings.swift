@@ -65,10 +65,22 @@ final class UserSettings {
         }
     }
 
+    private var weekendReminderEnabledRaw: Bool?
+
+    var weekendReminderEnabled: Bool {
+        get {
+            weekendReminderEnabledRaw ?? true
+        }
+        set {
+            weekendReminderEnabledRaw = newValue
+        }
+    }
+
     init(measurementUnit: MeasurementUnit = .inches, defaultViewMode: ViewMode = .grid, appearanceMode: AppearanceMode = .system) {
         self.id = UUID()
         self.measurementUnit = measurementUnit
         self.defaultViewMode = defaultViewMode
         self.appearanceModeRaw = appearanceMode.rawValue
+        self.weekendReminderEnabledRaw = true
     }
 }

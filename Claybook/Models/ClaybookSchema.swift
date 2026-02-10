@@ -160,9 +160,40 @@ enum ClaybookSchemaV2: VersionedSchema {
     }
 }
 
-// MARK: - V3 (current)
+// MARK: - V3 (frozen — stores appearance as raw string)
 enum ClaybookSchemaV3: VersionedSchema {
     static var versionIdentifier = Schema.Version(3, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        [
+            Item.self,
+            StageLog.self,
+            GlazeEntry.self,
+            ColorEntry.self,
+            Photo.self,
+            KilnLoad.self,
+            V3UserSettings.self
+        ]
+    }
+
+    @Model final class V3UserSettings {
+        var id: UUID
+        var measurementUnit: MeasurementUnit
+        var defaultViewMode: ViewMode
+        var appearanceMode: String?
+
+        init() {
+            self.id = UUID()
+            self.measurementUnit = .inches
+            self.defaultViewMode = .grid
+            self.appearanceMode = AppearanceMode.system.rawValue
+        }
+    }
+}
+
+// MARK: - V4 (current — adds weekend reminder setting)
+enum ClaybookSchemaV4: VersionedSchema {
+    static var versionIdentifier = Schema.Version(4, 0, 0)
 
     static var models: [any PersistentModel.Type] {
         [
@@ -180,11 +211,11 @@ enum ClaybookSchemaV3: VersionedSchema {
 // MARK: - Migration Plan
 enum ClaybookMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [ClaybookSchemaV1.self, ClaybookSchemaV2.self, ClaybookSchemaV3.self]
+        [ClaybookSchemaV1.self, ClaybookSchemaV2.self, ClaybookSchemaV3.self, ClaybookSchemaV4.self]
     }
 
     static var stages: [MigrationStage] {
-        [migrateV1toV2, migrateV2toV3]
+        [migrateV1toV2, migrateV2toV3, migrateV3toV4]
     }
 
     static let migrateV1toV2 = MigrationStage.lightweight(
@@ -195,5 +226,10 @@ enum ClaybookMigrationPlan: SchemaMigrationPlan {
     static let migrateV2toV3 = MigrationStage.lightweight(
         fromVersion: ClaybookSchemaV2.self,
         toVersion: ClaybookSchemaV3.self
+    )
+
+    static let migrateV3toV4 = MigrationStage.lightweight(
+        fromVersion: ClaybookSchemaV3.self,
+        toVersion: ClaybookSchemaV4.self
     )
 }
