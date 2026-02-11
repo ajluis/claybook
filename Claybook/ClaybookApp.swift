@@ -5,46 +5,25 @@ import SwiftUI
 @main
 struct ClaybookApp: App {
     let modelContainer: ModelContainer
+    @State private var showDataRecoveryAlert = false
 
     init() {
-        let schema = Schema(versionedSchema: ClaybookSchemaV4.self)
-        modelContainer = Self.makeResilientModelContainer(schema: schema)
-    }
-
-    private static func makeResilientModelContainer(schema: Schema) -> ModelContainer {
-        let storeURL = defaultStoreURL()
-        let diskConfiguration = ModelConfiguration(schema: schema, url: storeURL)
-
-        do {
-            return try makeModelContainer(schema: schema, configuration: diskConfiguration)
-        } catch {
-            NSLog("Claybook: failed to open persistent store, falling back to in-memory store. Error: \(String(describing: error))")
+        let result = StoreRecoveryService.openStore()
+        switch result {
+        case .healthy(let container):
+            modelContainer = container
+        case .recoveredFromBackup(let container):
+            modelContainer = container
+            // Defer alert to after SwiftUI is ready
+            _showDataRecoveryAlert = State(initialValue: true)
+        case .failed(let error):
+            fatalError("Claybook: unrecoverable store failure — \(error)")
         }
-
-        do {
-            let inMemoryConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-            return try makeModelContainer(schema: schema, configuration: inMemoryConfiguration)
-        } catch {
-            fatalError("Failed to create ModelContainer after all recovery attempts: \(error)")
-        }
-    }
-
-    private static func makeModelContainer(schema: Schema, configuration: ModelConfiguration) throws -> ModelContainer {
-        try ModelContainer(
-            for: schema,
-            migrationPlan: ClaybookMigrationPlan.self,
-            configurations: [configuration]
-        )
-    }
-
-    private static func defaultStoreURL() -> URL {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return appSupport.appendingPathComponent("default.store", isDirectory: false)
     }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(showDataRecoveryAlert: $showDataRecoveryAlert)
         }
         .modelContainer(modelContainer)
     }
@@ -53,6 +32,7 @@ struct ClaybookApp: App {
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allSettings: [UserSettings]
+    @Binding var showDataRecoveryAlert: Bool
 
     private var colorScheme: ColorScheme? {
         allSettings.first?.appearanceMode.colorScheme
@@ -64,6 +44,11 @@ struct ContentView: View {
             .onAppear {
                 let settings = modelContext.fetchOrCreateSettings()
                 PotteryReminderService.syncWeekendReminder(enabled: settings.weekendReminderEnabled)
+            }
+            .alert("Data Recovery", isPresented: $showDataRecoveryAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Your data file could not be opened and has been backed up. Your pottery data may need to be restored — please contact support.")
             }
     }
 }

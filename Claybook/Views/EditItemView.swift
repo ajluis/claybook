@@ -151,7 +151,7 @@ struct EditItemView: View {
         item.topDiameter = Decimal(string: topDiameterText)
         item.bottomDiameter = Decimal(string: bottomDiameterText)
         item.updatedAt = Date()
-
+        modelContext.saveQuietly()
         dismiss()
     }
 }

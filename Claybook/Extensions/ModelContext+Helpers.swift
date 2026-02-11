@@ -2,6 +2,10 @@ import SwiftData
 import UserNotifications
 
 extension ModelContext {
+    func saveQuietly() {
+        try? save()
+    }
+
     @discardableResult
     func fetchOrCreateSettings() -> UserSettings {
         let descriptor = FetchDescriptor<UserSettings>()
@@ -10,6 +14,7 @@ extension ModelContext {
         }
         let settings = UserSettings()
         insert(settings)
+        saveQuietly()
         return settings
     }
 }

@@ -469,10 +469,12 @@ struct LogStageView: View {
             if !candidates.isEmpty {
                 batchCandidates = candidates
                 showBatchPrompt = true
+                modelContext.saveQuietly()
                 return
             }
         }
 
+        modelContext.saveQuietly()
         dismiss()
     }
 
@@ -485,6 +487,7 @@ struct LogStageView: View {
             candidate.stageLogs.append(batchLog)
             candidate.updatedAt = Date()
         }
+        modelContext.saveQuietly()
     }
 
     // MARK: - Glaze Helpers

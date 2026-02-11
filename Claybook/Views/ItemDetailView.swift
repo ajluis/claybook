@@ -147,6 +147,7 @@ struct ItemDetailView: View {
                 Button {
                     item.isFavorite.toggle()
                     item.updatedAt = Date()
+                    modelContext.saveQuietly()
                 } label: {
                     Image(systemName: item.isFavorite ? "star.fill" : "star")
                         .foregroundStyle(item.isFavorite ? .yellow : Color.theme.textSecondary)
@@ -183,6 +184,7 @@ struct ItemDetailView: View {
             Button("Archive", role: .destructive) {
                 item.isArchived = true
                 item.updatedAt = Date()
+                modelContext.saveQuietly()
                 dismiss()
             }
             Button("Cancel", role: .cancel) {}

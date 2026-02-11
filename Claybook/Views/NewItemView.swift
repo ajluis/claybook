@@ -185,6 +185,7 @@ struct NewItemView: View {
         }
 
         item.updatedAt = Date()
+        modelContext.saveQuietly()
         dismiss()
     }
 }
